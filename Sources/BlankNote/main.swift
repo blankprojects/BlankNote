@@ -51,7 +51,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         panel.titleVisibility = .hidden
         panel.titlebarAppearsTransparent = true
         panel.toolbar = nil
-        panel.isMovableByWindowBackground = true
+        // Only the explicit title drag region may move the window. Otherwise
+        // AppKit can claim a row's drag before SwiftUI starts reordering it.
+        panel.isMovableByWindowBackground = false
         panel.isReleasedWhenClosed = false
         panel.hidesOnDeactivate = false
         panel.isFloatingPanel = true

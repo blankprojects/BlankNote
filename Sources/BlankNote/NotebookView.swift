@@ -120,12 +120,16 @@ struct NotebookView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            Text("BlankNote").font(.system(size: 15, weight: .semibold, design: .rounded))
-            TimelineView(.periodic(from: .now, by: 60)) { context in
-                Text(context.date.formatted(.dateTime.locale(Locale(identifier: "zh_CN")).month(.twoDigits).day(.twoDigits)))
-                    .font(.system(size: 10)).foregroundStyle(.tertiary)
+            HStack(spacing: 8) {
+                Text("BlankNote").font(.system(size: 15, weight: .semibold, design: .rounded))
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    Text(context.date.formatted(.dateTime.locale(Locale(identifier: "zh_CN")).month(.twoDigits).day(.twoDigits)))
+                        .font(.system(size: 10)).foregroundStyle(.tertiary)
+                }
+                Spacer(minLength: 0)
             }
-            Spacer(minLength: 0)
+            .frame(height: 26)
+            .overlay(WindowDragRegion())
             Button { state.onPin?() } label: {
                 Image(systemName: state.pinned ? "pin.fill" : "pin")
                     .rotationEffect(.degrees(35))
@@ -229,7 +233,7 @@ private struct TodoRow: View {
                 .font(.system(size: 9)).foregroundStyle(.tertiary)
                 .frame(width: 16, height: 20).contentShape(Rectangle())
                 .help("拖动排序").accessibilityLabel("拖动排序：\(item.text)")
-                .draggable("blanknote:\(item.id.uuidString)")
+                .overlay(TodoDragRegion(payload: "blanknote:\(item.id.uuidString)", label: item.text))
             Button { commit(); store.toggle(item.id) } label: {
                 Image(systemName: item.completed ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 18, weight: .light)).foregroundStyle(accent.opacity(item.completed ? 1 : 0.5))
@@ -248,6 +252,8 @@ private struct TodoRow: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .fixedSize(horizontal: false, vertical: true)
                     .contentShape(Rectangle()).onTapGesture(count: 2, perform: beginEdit)
+                    .overlay(TodoDragRegion(payload: "blanknote:\(item.id.uuidString)", label: item.text, onDoubleClick: beginEdit))
+                    .help("拖动排序，双击编辑")
             }
             Menu {
                 Button("编辑", action: beginEdit)
