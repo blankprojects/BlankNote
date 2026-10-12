@@ -1,0 +1,25 @@
+name: macOS CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test-and-build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run unit tests
+        run: zsh scripts/test.sh
+      - name: Build application
+        run: zsh scripts/build.sh
+      - name: Verify bundle and signature
+        run: |
+          plutil -lint build/BlankNote.app/Contents/Info.plist
+          codesign --verify --deep --strict build/BlankNote.app
+      - name: Package application
+        run: ditto -c -k --sequesterRsrc --keepParent build/BlankNote.app build/BlankNote-macOS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlankNote-macOS
+          path: build/BlankNote-macOS.zip
